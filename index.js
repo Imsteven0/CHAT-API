@@ -15,6 +15,8 @@ const app = express();
 //Establecer conexión a la base de datos MongoDB
 mongoose.Database();
 
+app.use(express.static('public'))
+
 //recibe y envia datos json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

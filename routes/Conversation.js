@@ -7,7 +7,12 @@ module.exports = function () {
 
   router.get("/listConversationById/:userId", controllerConversation.listConversationByUserID);
 
+  router.get("/listChatsUsers/:userId", controllerConversation.listChatsUsers);
+
   router.post("/newChat", controllerConversation.newChat);
+
+
+
 
   return router;
 };
