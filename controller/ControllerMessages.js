@@ -1,4 +1,5 @@
 const SchemaMessage = require("../models/message");
+const SchemaConversation = require("../models/conversation");
 
 exports.listMessagesByIdConversation = async (req, res, next) => {
   try {
@@ -12,6 +13,42 @@ exports.listMessagesByIdConversation = async (req, res, next) => {
   }
 };
 
+exports.ListMessageByID = async (req, res, next) => {
+  try {
+    const IdConversation = req.params.idMessage;
+    const messages = await SchemaMessage.find({
+      _id: IdConversation,
+    });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: "No se pudo recuperar el mensaje" });
+  }
+};
+
+exports.listMessagesByUsersIds = async (req, res, next) => {
+  try {
+    const conversation = await SchemaConversation.find({
+      $and: [
+        { userIds: { $elemMatch: { $eq: req.body.userOriginId } } },
+        { userIds: { $elemMatch: { $eq: req.body.userAuxId } } }
+      ]
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: "No se encontró la conversación" });
+    }
+
+    const messages = await SchemaMessage.find({
+      conversationId: conversation[0]._id,
+    });
+
+    res.json(messages);
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: "No se pudo recuperar mensajes" });
+  }
+};
+
 exports.newMessage = async (req, res, next) => {
   try {
     const message = new SchemaMessage({
@@ -20,8 +57,19 @@ exports.newMessage = async (req, res, next) => {
       senderId: req.body.UserIdSender,
     });
     const savedMessage = await message.save();
+
+    // Actualizar el arreglo messagesIds en el documento de conversación
+    const conversation = await SchemaConversation.findByIdAndUpdate(
+      req.body.IdConversation,
+      {
+        $push: { messagesIds: savedMessage._id },
+        lastMessageAt: Date.now(),
+      },
+      { new: true }
+    );
+
     res.status(200).json(savedMessage);
   } catch (error) {
-    res.status(500).json({ error: "No se pudo guardar la conversacion" });
+    res.status(500).json({ error: "No se pudo guardar el mensaje" });
   }
 };

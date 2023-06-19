@@ -11,8 +11,5 @@ module.exports = function () {
 
   router.post("/newChat", controllerConversation.newChat);
 
-
-
-
   return router;
 };

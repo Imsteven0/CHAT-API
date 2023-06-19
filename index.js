@@ -1,5 +1,8 @@
 const express = require("express");
 require("dotenv").config();
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require("cors");
 
 //Conexcion de moongoose
 const mongoose = require("./db/mongoose");
@@ -11,6 +14,15 @@ const Message = require("./routes/Messages");
 
 //creamos una constante que esta llamando a express
 const app = express();
+
+const corsOptions = {
+  origin: "http://localhost:3000", // Reemplaza con el origen correcto de tu cliente
+  methods: ["GET", "POST"], // Especifica los métodos HTTP permitidos
+  allowedHeaders: ["Content-Type", "Authorization"], // Especifica los encabezados permitidos
+};
+
+// Habilitar CORS con las opciones configuradas
+app.use(cors(corsOptions));
 
 //Establecer conexión a la base de datos MongoDB
 mongoose.Database();
@@ -26,8 +38,35 @@ app.use('/Users', Users());
 app.use('/Conversation', Conversation());
 app.use('/Message', Message());
 
+// Create an HTTP server using Express app
+const server = http.createServer(app);
 
-//para que el servidor se levante en el puerto 8000
-app.listen(process.env.PORT, () => {
+// Create a WebSocket server instance
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Reemplaza con el origen correcto de tu cliente
+    methods: ["GET", "POST"], // Especifica los métodos HTTP permitidos
+    allowedHeaders: ["Content-Type", "Authorization"], // Especifica los encabezados permitidos
+  },
+});
+
+// Event handler for new socket connections
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Event handler for 'disconnect' event
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+
+  socket.on('newMessage', (data) => {
+    console.log('Esta es la data: ' + data);
+    io.emit('messageReceived', data);
+  });
+
+});
+
+// Start the server
+server.listen(process.env.PORT, () => {
   console.log("Servidor corriendo en puerto " + process.env.PORT);
 });
