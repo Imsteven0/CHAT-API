@@ -27,16 +27,16 @@ app.use(cors(corsOptions));
 //Establecer conexión a la base de datos MongoDB
 mongoose.Database();
 
-app.use(express.static('public'))
+app.use(express.static("public"));
 
 //recibe y envia datos json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Llamar a las rutas necesarias.
-app.use('/Users', Users());
-app.use('/Conversation', Conversation());
-app.use('/Message', Message());
+app.use("/Users", Users());
+app.use("/Conversation", Conversation());
+app.use("/Message", Message());
 
 // Create an HTTP server using Express app
 const server = http.createServer(app);
@@ -51,19 +51,13 @@ const io = new Server(server, {
 });
 
 // Event handler for new socket connections
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
+io.on("connection", (socket) => {
   // Event handler for 'disconnect' event
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
+  socket.on("disconnect", () => {});
 
-  socket.on('newMessage', (data) => {
-    console.log('Esta es la data: ' + data);
-    io.emit('messageReceived', data);
+  socket.on("newMessage", (data) => {
+    io.emit("messageReceived", data);
   });
-
 });
 
 // Start the server
