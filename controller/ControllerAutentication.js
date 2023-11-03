@@ -17,13 +17,11 @@ exports.Register = async (req, res, next) => {
             return res.status(409).send("User Already Exist. Please Login");
         }
 
-        const encryptedPassword = await bcrypt.hash(hashedPassword, 10);
-
         const user = await SchemaUser.create({
             name,
             image: 'http://localhost:8000/imgs/avatarDefautl.jpg',
             email: email.toLowerCase(), // sanitize: convert email to lowercase
-            hashedPassword: encryptedPassword,
+            hashedPassword: await bcrypt.hash(hashedPassword, 10),
         });
 
         const token = jwt.sign(

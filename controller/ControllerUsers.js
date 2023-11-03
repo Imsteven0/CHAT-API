@@ -1,4 +1,5 @@
 const SchemaUser = require("../models/user");
+const bcrypt = require("bcryptjs");
 
 exports.listUsers = async (req, res, next) => {
   try {
@@ -11,11 +12,13 @@ exports.listUsers = async (req, res, next) => {
 
 exports.saveUser = async (req, res, next) => {
   try {
-    const userData = req.body; 
+    const userData = req.body;
+    userData.hashedPassword = await bcrypt.hash(userData.hashedPassword, 10)
     const newUser = new SchemaUser(userData);
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: "No se pudo guardar el usuario" });
   }
 };
