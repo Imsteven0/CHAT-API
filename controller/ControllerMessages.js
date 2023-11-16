@@ -73,3 +73,29 @@ exports.newMessage = async (req, res, next) => {
     res.status(500).json({ error: "No se pudo guardar el mensaje" });
   }
 };
+
+exports.saveNewMessage = async (data) => {
+  try {
+    const message = new SchemaMessage({
+      body: data.message,
+      conversationId: data.IdConversation,
+      senderId: data.UserIdSender,
+    });
+    const savedMessage = await message.save();
+
+    // Actualizar el arreglo messagesIds en el documento de conversación
+    const conversation = await SchemaConversation.findByIdAndUpdate(
+      data.IdConversation,
+      {
+        $push: { messagesIds: savedMessage._id },
+        lastMessageAt: Date.now(),
+      },
+      { new: true }
+    );
+
+    return savedMessage;
+  } catch (error) {
+    console.log(error);
+    return { error: "No se pudo guardar el mensaje" };
+  }
+};

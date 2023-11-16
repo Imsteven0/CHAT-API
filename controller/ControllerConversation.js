@@ -106,3 +106,23 @@ exports.newChat = async (req, res, next) => {
     res.status(500).json({ error: "No se pudo guardar la conversacion" });
   }
 };
+
+
+exports.getConversations = async (userId) => {
+  try {
+    let conversations = await SchemaConversation.find({ userIds: userId }).lean();
+
+    for (let index = 0; index < conversations.length; index++) {
+      const obj = conversations[index];
+      const users = await SchemaUser.find({ _id: { $in: obj.userIds } }).lean();
+      const messages = await SchemaMessage.find({ _id: { $in: obj.messagesIds } }).lean();
+      conversations[index].messages = messages;
+      conversations[index].users = users;
+    }
+
+    return conversations;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
