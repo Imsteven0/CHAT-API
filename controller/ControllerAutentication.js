@@ -32,7 +32,7 @@ exports.Register = async (req, res, next) => {
             }
         );
 
-        res.status(201).json({token: token});
+        res.status(200).json({token: token});
     } catch (err) {
         console.log(err);
     }
@@ -50,15 +50,17 @@ exports.Login = async (req, res, next) => {
 
         if (user && (await bcrypt.compare(hashedPassword, user.hashedPassword))) {
             const token = jwt.sign(
-                {user_id: user._id, name: user.name},
+                {user_id: user._id, name: user.name, image: user.image},
                 process.env.TOKEN_KEY,
                 {
                     expiresIn: "2h",
                 }
             );
 
+            console.log({token: token})
             res.status(200).json({token: token});
         } else {
+            console.log('efe')
             res.status(400).send("Invalid Credentials");
         }
     } catch (err) {

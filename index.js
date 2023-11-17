@@ -17,9 +17,7 @@ const Auth = require("./routes/Autentication");
 const app = express();
 
 const corsOptions = {
-    origin: "http://localhost:3000", // Reemplaza con el origen correcto de tu cliente
-    methods: ["GET", "POST"], // Especifica los métodos HTTP permitidos
-    allowedHeaders: ["Content-Type", "Authorization"], // Especifica los encabezados permitidos
+    origin: "*"
 };
 
 // Habilitar CORS con las opciones configuradas
