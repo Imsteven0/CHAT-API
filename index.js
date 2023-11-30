@@ -16,12 +16,8 @@ const Auth = require("./routes/Autentication");
 //creamos una constante que esta llamando a express
 const app = express();
 
-const corsOptions = {
-    origin: "*"
-};
-
 // Habilitar CORS con las opciones configuradas
-app.use(cors(corsOptions));
+app.use(cors());
 
 //Establecer conexión a la base de datos MongoDB
 mongoose.Database();
@@ -43,7 +39,7 @@ const server = http.createServer(app);
 
 ioServer.ioServer(server);
 
-// Start the server
+// Start the seqrver
 server.listen(process.env.PORT, () => {
     console.log("Servidor corriendo en puerto " + process.env.PORT);
 });
