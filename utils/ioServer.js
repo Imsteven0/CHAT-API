@@ -37,10 +37,8 @@ exports.ioServer = (server) => {
         });
 
         socket.on("addFriend", async (dataUser) => {
-            console.log('este es ' + dataUser.idOriginUser);
             await createNewChat(dataUser);
             let data = await getConversations(dataUser.idOriginUser);
-            console.log(data);
             io.emit("userChats", data);
         });
 

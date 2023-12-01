@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const http = require("http");
+const path = require('path');
 const cors = require("cors");
 const ioServer = require("./utils/ioServer");
 
@@ -26,7 +27,7 @@ app.use(express.static("public"));
 
 //recibe y envia datos json
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Llamar a las rutas necesarias.
 app.use("/Users", Users());
@@ -38,6 +39,12 @@ app.use("/Auth", Auth());
 const server = http.createServer(app);
 
 ioServer.ioServer(server);
+
+app.use(express.static(__dirname + "/client/build"));
+
+app.get("*", (req, res) => {
+    res.sendFile(__dirname + "/client/build/index.html");
+});
 
 // Start the seqrver
 server.listen(process.env.PORT, () => {

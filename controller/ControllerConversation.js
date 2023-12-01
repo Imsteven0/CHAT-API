@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const SchemaConversation = require("../models/conversation");
 const SchemaUser = require("../models/user");
 const SchemaMessage = require("../models/message");
+const user = require('../models/user');
 
 exports.listChatsUsers = async (req, res, next) => {
     try {
@@ -79,30 +80,28 @@ exports.listConversationByUserID = async (req, res, next) => {
 
 exports.newChat = async (req, res, next) => {
     try {
-        const conversation = new SchemaConversation({
-            userIds: [req.body.id_user_1, req.body.id_user_2],
-        });
-        const savedConversation = await conversation.save();
+        let userId = '6557ee223a8c7f4382f194b8';
+        let userData = await SchemaUser.findOne({_id: userId});
 
-        const user1 = await SchemaUser.findByIdAndUpdate(
-            req.body.id_user_1,
-            {
-                $push: {conversationIds: savedConversation._id},
-            },
-            {new: true}
+        let chat = await Promise.all(
+            userData.conversationIds.map(async (conversationId) => {
+                let conversation = await SchemaConversation.findById(conversationId);
+                if (conversation !== null) {
+                    let [users, messages] = await Promise.all([
+                        SchemaUser.find({_id: {$in: conversation.userIds}}).lean(),
+                        SchemaMessage.find({_id: {$in: conversation.messagesIds}}).lean()
+                    ]);
+                    return {...conversation.toObject(), users, messages};
+                }
+            })
         );
 
-        const user2 = await SchemaUser.findByIdAndUpdate(
-            req.body.id_user_2,
-            {
-                $push: {conversationIds: savedConversation._id},
-            },
-            {new: true}
-        );
-
-        res.status(200).json(savedConversation);
+        let chats = chat.filter(Boolean);
+        userData = {...userData.toObject(), chats};
+        res.json(userData);
     } catch (error) {
-        res.status(500).json({error: "No se pudo guardar la conversacion"});
+        console.error(error);
+        res.status(500).json({error: "No se pudo recuperar conversaciones"});
     }
 };
 
